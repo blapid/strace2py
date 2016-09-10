@@ -9,8 +9,9 @@ grammar = Grammar(
 
     syscall = syscall_name "(" argument_list ")" " "+ "=" " "+  ret_val
     argument_list = (argument_list_value)*
-    ret_val = symbol argument?
+    ret_val = symbol (argument / unfinished)?
     syscall_name = symbol / "UNUSED"
+    unfinished = "<unfinished ...>"
 
     argument_list_value = separator? argument
     argument = comment / truncated_args / keyval / dict / list / literal
