@@ -1,5 +1,5 @@
 import unittest
-import strace_parser
+import strace2py
 
 class TestStraceParser(unittest.TestCase):
     def __init__(self, *args, **kwargs):
