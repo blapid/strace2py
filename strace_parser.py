@@ -13,18 +13,18 @@ class StraceVisitor(parsimonious.NodeVisitor):
     def visit_dict_argument(self, node, (sep, argument,)):
         if not argument:
             return argument
-        if isinstance(argument, tuple):
+        if isinstance(argument, dict):
             return argument
         elif isinstance(argument, parsimonious.nodes.Node):
             if argument.expr_name == 'comment':
-                return ('_comment', argument.text)
+                return {'_comment': argument.text}
             else:
-                return ('_unknown', argument.text)
+                return {'_unknown': argument.text}
         else:
             return argument
 
-    def visit_dict_kv(self, node, visited_children):
-        kv = (visited_children[0], visited_children[2])
+    def visit_keyval(self, node, visited_children):
+        kv = {visited_children[0]: visited_children[2]}
         return kv
 
     def visit_dict(self, node, visited_children):
@@ -34,8 +34,8 @@ class StraceVisitor(parsimonious.NodeVisitor):
         if not isinstance(visited_children, list):
             visited_children = [visited_children]
         for child in visited_children:
-            if isinstance(child, tuple):
-                d[child[0]] = child[1]
+            if isinstance(child, dict):
+                d.update(child)
             else:
                 d["_%d" % (i,)] = child
             i += 1

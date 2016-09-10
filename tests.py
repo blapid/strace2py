@@ -84,5 +84,8 @@ class TestStraceParser(unittest.TestCase):
             '8','-1'],
             '1 ([{fd=23, revents=POLLIN}])')
 
+    def test_kv_arg(self):
+        self.helper(r'A(B=0x1234abcd) = 0',
+            'A', [{'B':'0x1234abcd'}] ,'0')
 if __name__ == '__main__':
     unittest.main()

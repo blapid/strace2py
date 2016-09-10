@@ -13,11 +13,11 @@ grammar = Grammar(
     syscall_name = symbol / "UNUSED"
 
     argument_list_value = separator? argument
-    argument = comment / truncated_args / dict / list / literal
+    argument = comment / truncated_args / keyval / dict / list / literal
 
     dict = "{" (dict_argument)* "}"
-    dict_argument = separator? (truncated_args / dict_kv / argument)
-    dict_kv = symbol "=" argument
+    dict_argument = separator? (truncated_args / keyval / argument)
+    keyval = symbol "=" argument
 
     list = "[" (list_value)* "]"
     list_value = separator? argument
