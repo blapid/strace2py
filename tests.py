@@ -4,7 +4,7 @@ import strace2py
 class TestStraceParser(unittest.TestCase):
     def __init__(self, *args, **kwargs):
         super(TestStraceParser, self).__init__(*args, **kwargs)
-        self.p = strace_parser.StraceParser()
+        self.p = strace2py.StraceParser()
 
     def helper(self, line, name, args, ret):
         r = self.p.parse_line(line)
