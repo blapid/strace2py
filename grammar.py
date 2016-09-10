@@ -8,17 +8,19 @@ grammar = Grammar(
     entry_suffix = "UNUSED"
 
     syscall = syscall_name "(" argument_list ")" " "+ "=" " "+  ret_val
-    argument_list = argument? (", " argument)*
+    argument_list = (argument_list_value)*
     ret_val = symbol ("(" symbol ")")?
     syscall_name = symbol / "UNUSED"
 
+    argument_list_value = separator? argument
     argument = comment / truncated_args / dict / list / literal
 
-    dict = "{" dict_argument? (", " dict_argument)* "}"
-    dict_argument = truncated_args / dict_kv / argument
+    dict = "{" (dict_argument)* "}"
+    dict_argument = separator? (truncated_args / dict_kv / argument)
     dict_kv = symbol "=" argument
 
-    list = "[" argument? (", " argument)* "]"
+    list = "[" (list_value)* "]"
+    list_value = separator? argument
 
     literal = function_call / string / bytes / symbol
 
@@ -29,4 +31,5 @@ grammar = Grammar(
     string = ~"[\\"]"i string_chars ~"[\\"]"i truncated_args?
     string_chars = ~"[a-zA-Z \t0-9_/\.\|\-]*"i
     bytes = ~"[\\"][ -~]*[\\"]"i truncated_args?
+    separator = ", "
 ''')

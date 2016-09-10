@@ -5,46 +5,60 @@ import grammar
 
 class StraceVisitor(parsimonious.NodeVisitor):
     def visit_argument(self, node, visited_children):
-        visited_children = visited_children[0]
-        if isinstance(visited_children, dict):
-            return visited_children
-        return node.text
+        return visited_children[0]
 
     def visit_entry(self, node, (prefix, entry, suffix)):
         return entry
 
-    def visit_dict_argument(self, node, (argument,)):
+    def visit_dict_argument(self, node, (sep, argument,)):
         if not argument:
             return argument
-        if isinstance(argument, dict):
+        if isinstance(argument, tuple):
             return argument
         elif isinstance(argument, parsimonious.nodes.Node):
             if argument.expr_name == 'comment':
-                return {'_comment': argument.text}
-            elif argument.expr_name == 'truncated_args':
-                return {'_truncated': True}
+                return ('_comment', argument.text)
             else:
-                return {'_unknown': argument.text}
+                return ('_unknown', argument.text)
         else:
             return argument
 
     def visit_dict_kv(self, node, visited_children):
-        kv = {visited_children[0]: visited_children[2]}
+        kv = (visited_children[0], visited_children[2])
         return kv
 
     def visit_dict(self, node, visited_children):
         d = {}
         i = 0
-        for x in visited_children:
-            if not x:
-                continue
-            for xx in x:
-                if isinstance(xx, dict):
-                    d.update(xx)
-                else:
-                    d["_%d" % (i,)] = str(xx)
+        visited_children = visited_children[1]
+        if not isinstance(visited_children, list):
+            visited_children = [visited_children]
+        for child in visited_children:
+            if isinstance(child, tuple):
+                d[child[0]] = child[1]
+            else:
+                d["_%d" % (i,)] = child
             i += 1
         return d
+
+    def visit_list(self, node, visited_children):
+        #print visited_children
+        values = []
+        visited_children = visited_children[1]
+        if not isinstance(visited_children, list):
+            visited_children = [visited_children]
+        for child in visited_children:
+            values.append(child)
+        return values
+
+    def visit_argument_list(self, node, visited_children):
+        values = []
+        for child in visited_children:
+            values.append(child)
+        return values
+
+    def visit_argument_list_value(self, node, (sep, argument)):
+        return argument
 
     def visit_syscall(self, node, (syscall_name,  _1,
                         argument_list,  _2, _3, _4, _5, ret_val)):
@@ -53,6 +67,9 @@ class StraceVisitor(parsimonious.NodeVisitor):
             'args': argument_list or [],
             'ret': ret_val
         }
+
+    def visit_list_value(self, node, visited_children):
+        return visited_children[-1]
 
     def visit_syscall_name(self, node, visited_children):
         return node.text
@@ -63,20 +80,28 @@ class StraceVisitor(parsimonious.NodeVisitor):
     def visit_symbol(self, node, visited_children):
         return node.text
 
+    def visit_literal(self, node, visited_children):
+        return node.text
+
     def visit_truncated_args(self, node, visited_children):
-        return node
+        return node.text
 
     def visit_comment(self, node, visited_children):
-        return node
+        return node.text
 
     def generic_visit(self, node, visited_children):
-        actual_children = []
-        for child in visited_children:
-            if isinstance(child, list):
-                actual_children.extend(child)
-            elif child:
-                actual_children.append(child)
-        return actual_children or None
+        if len(visited_children) == 1:
+            return visited_children[0]
+        elif len(visited_children) == 0:
+            return node.text
+        else:
+            values = []
+            for child in visited_children:
+                if not str(child):
+                    continue
+                values.append(child)
+            return values
+
 
 class StraceParser(object):
     def __init__(self, override_grammer = None):
