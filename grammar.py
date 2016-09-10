@@ -9,7 +9,7 @@ grammar = Grammar(
 
     syscall = syscall_name "(" argument_list ")" " "+ "=" " "+  ret_val
     argument_list = (argument_list_value)*
-    ret_val = symbol ("(" symbol ")")?
+    ret_val = symbol argument?
     syscall_name = symbol / "UNUSED"
 
     argument_list_value = separator? argument

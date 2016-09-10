@@ -74,5 +74,15 @@ class TestStraceParser(unittest.TestCase):
         self.helper('execve([[1, 2, 3], [4, 5, 6], [7, 8, 9]]) = 0',
             'execve', [[['1','2','3'],['4','5','6'],['7','8','9']]], '0')
 
+    def test_poll(self):
+        self.helper(r'poll([{fd=5, events=POLLIN}, {fd=4, events=POLLIN}, {fd=7, events=POLLIN|POLLPRI}, {fd=10, events=POLLIN}, {fd=9, events=POLLIN|POLLPRI}, {fd=26, '
+            +r'events=POLLIN}, {fd=22, events=POLLIN}, {fd=23, events=POLLIN}], 8, -1) = 1 ([{fd=23, revents=POLLIN}])',
+            'poll',[[{'events': 'POLLIN', 'fd': '5'},{'events': 'POLLIN', 'fd': '4'},
+            {'events': 'POLLIN|POLLPRI', 'fd': '7'},{'events': 'POLLIN', 'fd': '10'},
+            {'events': 'POLLIN|POLLPRI', 'fd': '9'},{'events': 'POLLIN', 'fd': '26'},
+            {'events': 'POLLIN', 'fd': '22'},{'events': 'POLLIN', 'fd': '23'}],
+            '8','-1'],
+            '1 ([{fd=23, revents=POLLIN}])')
+
 if __name__ == '__main__':
     unittest.main()
